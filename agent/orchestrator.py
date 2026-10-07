@@ -53,7 +53,7 @@ def get_client():
 
 
 RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
-MAX_WORTHWHILE_RETRY_DELAY_SECONDS = 30
+MAX_WORTHWHILE_RETRY_DELAY_SECONDS = 90
 _RETRY_DELAY_RE = re.compile(r"retryDelay['\"]?\s*:\s*['\"](\d+)s")
 
 
