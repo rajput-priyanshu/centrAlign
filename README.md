@@ -30,11 +30,13 @@ cp .env.example .env
 RESET_DB=1 ./run.sh   # first run: wipes the AP system DB so demo scenarios are fresh
 ```
 
-Then open **http://127.0.0.1:5000** — this is the dashboard: type a goal, watch
+Then open **http://127.0.0.1:5050** — this is the dashboard: type a goal, watch
 the agent work, answer it if it asks a question, and read the final verified
-report. You can also open the two simulated company apps directly to see the
-starting state the agent sees: **http://127.0.0.1:5001** (Vendor Mail) and
-**http://127.0.0.1:5002** (Internal AP System, login `ap_agent` /
+report. (Port 5050, not 5000 - macOS's AirPlay Receiver squats on 5000 by
+default and will return a confusing "403 Forbidden" instead of your dashboard
+if you point it there.) You can also open the two simulated company apps
+directly to see the starting state the agent sees: **http://127.0.0.1:5001**
+(Vendor Mail) and **http://127.0.0.1:5002** (Internal AP System, login `ap_agent` /
 `CentrAlign#2026`).
 
 On subsequent runs, omit `RESET_DB=1` to keep previously entered invoices (or set
@@ -77,7 +79,7 @@ python3 tests/test_verification.py     # independent-verification logic test
 ┌─────────────────┐        ┌───────────────────────────────────────┐
 │    Dashboard     │  HTTP  │              Orchestrator              │
 │  (Flask + JS,    │◄──────►│  agent/orchestrator.py                 │
-│   port 5000)     │        │  - deterministic state machine         │
+│   port 5050)     │        │  - deterministic state machine         │
 └─────────────────┘        │  - Gemini tool-use loop (per task,     │
                              │    on its own thread)                  │
                              │  - step cap / consecutive-error cap    │
@@ -306,7 +308,7 @@ narrow prototype — see Limitations.
 agent/            orchestration loop, tool definitions, browser wrapper, memory
 apps/vendor_mail/ mock vendor inbox (Flask, :5001) + seed data
 apps/ap_system/   mock internal AP system (Flask, :5002) + SQLite DB
-dashboard/        task submission UI, live trace, ask_user, final report (:5000)
+dashboard/        task submission UI, live trace, ask_user, final report (:5050)
 tests/            LLM-free smoke tests for browser automation + verification logic
 data/             SQLite DB + per-task memory scratchpads (gitignored)
 evidence/         per-task screenshots captured during execution (gitignored)
