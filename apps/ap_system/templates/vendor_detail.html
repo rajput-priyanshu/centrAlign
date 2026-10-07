@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ vendor_name }}{% endblock %}
+{% block content %}
+  <a class="back" href="/vendors">&larr; Back to vendors</a>
+  <h2>{{ vendor_name }}</h2>
+
+  {% if request.args.get('submitted') %}
+    <div class="flash-success">Invoice recorded successfully.</div>
+  {% endif %}
+  {% if request.args.get('already_exists') %}
+    <div class="flash-success">This invoice number was already recorded for this vendor - no duplicate created.</div>
+  {% endif %}
+  {% if error %}
+    <div class="flash-error">{{ error }}</div>
+  {% endif %}
+
+  <h3>Recorded invoices</h3>
+  <table>
+    <tr><th>Invoice #</th><th>Amount</th><th>Due date</th><th>Notes</th><th>Recorded at</th></tr>
+    {% for inv in invoices %}
+    <tr>
+      <td>{{ inv.invoice_number }}</td>
+      <td>{{ inv.amount }}</td>
+      <td>{{ inv.due_date }}</td>
+      <td>{{ inv.notes }}</td>
+      <td>{{ inv.created_at }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">No invoices recorded yet for this vendor.</td></tr>
+    {% endfor %}
+  </table>
+
+  <h3>Add new invoice</h3>
+  <form class="entry" method="post" action="/vendors/{{ vendor_name }}/invoices">
+    <label for="invoice_number">Invoice number</label>
+    <input type="text" id="invoice_number" name="invoice_number" required>
+    <label for="amount">Amount</label>
+    <input type="text" id="amount" name="amount" required>
+    <label for="due_date">Due date</label>
+    <input type="text" id="due_date" name="due_date" placeholder="YYYY-MM-DD" required>
+    <label for="notes">Notes (optional)</label>
+    <textarea id="notes" name="notes" rows="2"></textarea>
+    <button type="submit">Submit invoice</button>
+  </form>
+{% endblock %}

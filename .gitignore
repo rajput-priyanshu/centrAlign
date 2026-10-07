@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+data/*.db
+data/memory/
+evidence/
+tests/_smoke_evidence/
+.DS_Store

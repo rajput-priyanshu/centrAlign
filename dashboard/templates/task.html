@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Task {{ task_id }} - centrAlign</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">centr<span>Align</span></div>
+    <a href="/">&larr; All tasks</a>
+  </header>
+  <div class="wrap">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 id="goal" style="margin:0;">Loading...</h2>
+        <span id="status-badge" class="badge">...</span>
+      </div>
+    </div>
+
+    <div id="ask-box" class="ask-box" style="display:none;">
+      <strong>The agent needs your input:</strong>
+      <p id="question"></p>
+      <input type="text" id="answer" placeholder="Type your answer...">
+      <button onclick="sendAnswer()">Send answer</button>
+    </div>
+
+    <div id="report-box" class="card" style="display:none;"></div>
+
+    <div class="card">
+      <h2>Live trace</h2>
+      <div id="trace"></div>
+    </div>
+  </div>
+
+  <div id="lightbox" onclick="this.style.display='none'"><img id="lightbox-img"></div>
+
+  <script>
+    const taskId = "{{ task_id }}";
+    let lastLen = 0;
+
+    function esc(s) { return (s===undefined||s===null) ? '' : String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+    function renderEvent(ev) {
+      if (ev.type === 'reasoning') {
+        return `<div class="trace-event reasoning"><span class="label">🧠 reasoning</span>${esc(ev.text)}</div>`;
+      }
+      if (ev.type === 'tool_call') {
+        return `<div class="trace-event tool_call"><span class="label">🔧 ${esc(ev.tool)}</span><pre>${esc(JSON.stringify(ev.input))}</pre></div>`;
+      }
+      if (ev.type === 'tool_result') {
+        return `<div class="trace-event tool_result ${ev.is_error?'err':''}"><span class="label">${ev.is_error?'❌':'↳'} result of ${esc(ev.tool)}</span><pre>${esc((ev.text||'').slice(0,400))}</pre></div>`;
+      }
+      if (ev.type === 'tool_error') {
+        return `<div class="trace-event tool_result err"><span class="label">❌ error in ${esc(ev.tool)}</span><pre>${esc(ev.error)}</pre></div>`;
+      }
+      if (ev.type === 'observation') {
+        const shot = ev.screenshot_filename ? `<br><img class="shot" src="/evidence/${taskId}/${ev.screenshot_filename}" onclick="openLightbox(this.src)">` : '';
+        return `<div class="trace-event"><span class="label">👁 page</span>${esc(ev.url)} &mdash; ${esc(ev.title)}${shot}</div>`;
+      }
+      if (ev.type === 'ask_user') {
+        return `<div class="trace-event ask_user"><span class="label">❓ asked user</span>${esc(ev.question)}</div>`;
+      }
+      if (ev.type === 'human_answer') {
+        return `<div class="trace-event ask_user"><span class="label">🙋 human answered</span>${esc(ev.answer)}</div>`;
+      }
+      if (ev.type === 'verification') {
+        const d = (ev.discrepancies||[]).map(x => `<div class="discrepancy">⚠ ${esc(x)}</div>`).join('') || '<div class="ok">✓ no discrepancies found</div>';
+        return `<div class="trace-event verification"><span class="label">🔍 independent verification</span>${d}</div>`;
+      }
+      if (ev.type === 'status') {
+        return `<div class="trace-event"><span class="label">● status</span>${esc(ev.status)} ${esc(ev.detail||'')}</div>`;
+      }
+      if (ev.type === 'provider_retry') {
+        const extra = ev.note ? `<br><em>${esc(ev.note)}</em>` : '';
+        return `<div class="trace-event ask_user"><span class="label">🔁 provider retry</span>attempt ${ev.attempt}, waiting ${ev.wait_seconds}s &mdash; <pre>${esc(ev.error)}</pre>${extra}</div>`;
+      }
+      if (ev.type === 'fatal_error') {
+        return `<div class="trace-event tool_result err"><span class="label">💥 fatal error</span><pre>${esc(ev.error)}</pre></div>`;
+      }
+      return `<div class="trace-event">${esc(JSON.stringify(ev))}</div>`;
+    }
+
+    function renderReport(task) {
+      const box = document.getElementById('report-box');
+      if (!task.result) { box.style.display = 'none'; return; }
+      box.style.display = 'block';
+      const d = task.result.done || {};
+      const v = task.result.verification || {};
+      const mem = task.result.memory || {};
+      let html = `<h2>Final report</h2>`;
+      html += `<div class="kv">
+        <div class="k">Agent-reported outcome</div><div>${d.success ? '✅ success' : '❌ failed'}</div>
+        <div class="k">Summary</div><div>${esc(d.summary)}</div>
+        ${d.vendor_name ? `<div class="k">Vendor</div><div>${esc(d.vendor_name)}</div>` : ''}
+        ${d.invoice_number ? `<div class="k">Invoice #</div><div>${esc(d.invoice_number)}</div>` : ''}
+        ${d.amount ? `<div class="k">Amount</div><div>${esc(d.amount)}</div>` : ''}
+        ${d.due_date ? `<div class="k">Due date</div><div>${esc(d.due_date)}</div>` : ''}
+        ${d.reason_if_failed ? `<div class="k">Failure reason</div><div>${esc(d.reason_if_failed)}</div>` : ''}
+      </div>`;
+      html += `<h3>Independent verification (orchestrator, not the agent)</h3>`;
+      if (v.checked === false) {
+        html += `<p class="discrepancy">${esc(v.note || 'Not verifiable.')}</p>`;
+      } else if (v.checked) {
+        html += `<div class="kv">
+          <div class="k">Found in AP system?</div><div>${v.ap_system_entry && v.ap_system_entry.found ? '✅ yes' : '❌ no'}</div>
+          <div class="k">Matches source invoice?</div><div>${v.overall_match ? '<span class="ok">✅ yes</span>' : '⚠ see discrepancies'}</div>
+        </div>`;
+        (v.discrepancies||[]).forEach(x => html += `<div class="discrepancy">⚠ ${esc(x)}</div>`);
+      }
+      html += `<h3>Facts remembered during execution</h3><pre>${esc(JSON.stringify(mem, null, 2))}</pre>`;
+      box.innerHTML = html;
+    }
+
+    function openLightbox(src) {
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox').style.display = 'flex';
+    }
+
+    async function sendAnswer() {
+      const answer = document.getElementById('answer').value;
+      await fetch(`/api/tasks/${taskId}/answer`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({answer}) });
+      document.getElementById('answer').value = '';
+      document.getElementById('ask-box').style.display = 'none';
+    }
+
+    async function poll() {
+      const res = await fetch(`/api/tasks/${taskId}`);
+      const task = await res.json();
+      document.getElementById('goal').textContent = task.goal;
+      const badge = document.getElementById('status-badge');
+      badge.textContent = task.status;
+      badge.className = 'badge ' + task.status;
+
+      if (task.status === 'waiting_for_input' && task.pending_question) {
+        document.getElementById('question').textContent = task.pending_question;
+        document.getElementById('ask-box').style.display = 'block';
+      } else {
+        document.getElementById('ask-box').style.display = 'none';
+      }
+
+      if (task.trace.length !== lastLen) {
+        document.getElementById('trace').innerHTML = task.trace.map(renderEvent).join('');
+        lastLen = task.trace.length;
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+
+      renderReport(task);
+    }
+    poll();
+    setInterval(poll, 1200);
+  </script>
+</body>
+</html>

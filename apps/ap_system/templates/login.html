@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Login - AP System</title>
+<style>
+  body { font-family: -apple-system, Arial, sans-serif; background: #f4f5f7; }
+  .login-box { max-width: 340px; margin: 80px auto; background: white; padding: 28px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .login-box h2 { margin-top: 0; }
+  .login-box input { width: 100%; padding: 10px; margin-top: 6px; margin-bottom: 14px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+  .login-box button { width: 100%; padding: 10px; border: none; background: #1f7a4c; color: white; border-radius: 6px; cursor: pointer; }
+  .err { color: #b3261e; font-size: 13px; }
+  label { font-size: 12px; color: #666; text-transform: uppercase; }
+</style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>🏢 AP System Login</h2>
+    {% if error %}<p class="err">{{ error }}</p>{% endif %}
+    <form method="post">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" autocomplete="username">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" autocomplete="current-password">
+      <button type="submit">Log in</button>
+    </form>
+  </div>
+</body>
+</html>

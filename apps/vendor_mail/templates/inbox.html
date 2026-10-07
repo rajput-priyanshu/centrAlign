@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Inbox{% endblock %}
+{% block content %}
+  <form class="search" method="get">
+    <input type="text" name="q" placeholder="Search vendor or subject..." value="{{ query }}">
+    <button type="submit">Search</button>
+  </form>
+  <table>
+    <tr><th>From</th><th>Subject</th><th>Received</th><th></th></tr>
+    {% for e in emails %}
+    <tr>
+      <td>{{ e.vendor_name }}</td>
+      <td><a href="/email/{{ e.id }}">{{ e.subject }}</a>{% if e.has_attachment %}<span class="tag">attachment</span>{% endif %}</td>
+      <td>{{ e.received_at }}</td>
+      <td><a href="/email/{{ e.id }}">open &rarr;</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4">No emails match "{{ query }}".</td></tr>
+    {% endfor %}
+  </table>
+{% endblock %}

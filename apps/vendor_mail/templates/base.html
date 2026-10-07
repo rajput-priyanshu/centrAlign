@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Vendor Mail{% endblock %}</title>
+  <style>
+    body { font-family: -apple-system, Arial, sans-serif; margin: 0; background: #f4f5f7; color: #1d1d1f; }
+    header { background: #2b2d42; color: white; padding: 14px 24px; font-size: 18px; font-weight: 600; }
+    .container { max-width: 900px; margin: 24px auto; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 20px 28px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #eee; font-size: 14px; }
+    th { color: #666; font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    tr:hover { background: #fafafa; }
+    a { color: #2b57d8; text-decoration: none; }
+    .search { margin-bottom: 16px; }
+    .search input { padding: 8px 10px; width: 300px; border: 1px solid #ccc; border-radius: 6px; }
+    .search button { padding: 8px 14px; border: none; background: #2b57d8; color: white; border-radius: 6px; cursor: pointer; }
+    .tag { display: inline-block; font-size: 11px; background: #eef1fb; color: #2b57d8; border-radius: 4px; padding: 2px 6px; margin-left: 6px; }
+    .back { display: inline-block; margin-bottom: 14px; font-size: 13px; }
+    .invoice-doc { border: 1px solid #ddd; padding: 24px; font-family: Georgia, serif; }
+    .invoice-doc h2 { margin-top: 0; }
+    .invoice-doc table td { border: none; padding: 4px 0; }
+    .invoice-doc .label { color: #666; width: 160px; }
+    .amount { font-size: 20px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <header>📧 Vendor Mail &mdash; Shared Company Inbox</header>
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

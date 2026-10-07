@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ email.subject }}{% endblock %}
+{% block content %}
+  <a class="back" href="/">&larr; Back to inbox</a>
+  <h2>{{ email.subject }}</h2>
+  <p><strong>From:</strong> {{ email.sender_name }} &lt;{{ email.sender_email }}&gt;<br>
+     <strong>Vendor:</strong> {{ email.vendor_name }}<br>
+     <strong>Received:</strong> {{ email.received_at }}</p>
+  <hr>
+  <pre style="white-space: pre-wrap; font-family: inherit;">{{ email.body }}</pre>
+  {% if email.has_attachment %}
+  <p><a href="/attachment/{{ email.id }}">📎 Open attachment (invoice document)</a></p>
+  {% endif %}
+{% endblock %}

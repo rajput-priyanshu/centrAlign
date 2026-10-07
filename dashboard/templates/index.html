@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>centrAlign - Autonomous AI Task Worker</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">centr<span>Align</span> &mdash; Autonomous AI Task Worker</div>
+    <div><a href="http://127.0.0.1:5001" target="_blank">Vendor Mail ↗</a> &nbsp; <a href="http://127.0.0.1:5002" target="_blank">AP System ↗</a></div>
+  </header>
+  <div class="wrap">
+    <div class="card">
+      <h2>Give the agent a goal</h2>
+      <textarea id="goal" rows="3" placeholder="e.g. Find the latest invoice from Nimbus Cloud Services, extract the amount and due date, and enter it into our internal AP system."></textarea>
+      <div class="examples">
+        Try: "Find the latest invoice from Nimbus Cloud Services and record it in the AP system." &middot;
+        "Record the latest invoice from Brightline Logistics in the AP system." (ambiguous amount &rarr; agent should ask) &middot;
+        "Find and record the latest invoice from Acme Papers." (no invoices exist &rarr; agent should report failure)
+      </div>
+      <button onclick="startTask()">Start task</button>
+    </div>
+
+    <div class="card">
+      <h2>Recent tasks</h2>
+      <div id="tasks"></div>
+    </div>
+  </div>
+
+  <script>
+    async function startTask() {
+      const goal = document.getElementById('goal').value.trim();
+      if (!goal) return;
+      const res = await fetch('/api/tasks', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({goal}) });
+      const data = await res.json();
+      if (data.id) window.location.href = '/task/' + data.id;
+    }
+    async function loadTasks() {
+      const res = await fetch('/api/tasks');
+      const tasks = await res.json();
+      const el = document.getElementById('tasks');
+      el.innerHTML = tasks.map(t => `
+        <div class="task-row">
+          <a href="/task/${t.id}">${t.goal.slice(0,90)}</a>
+          <span class="badge ${t.status}">${t.status}</span>
+        </div>
+      `).join('') || '<p style="color:#8a8f99">No tasks yet.</p>';
+    }
+    loadTasks();
+    setInterval(loadTasks, 3000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Internal AP System{% endblock %}</title>
+  <style>
+    body { font-family: -apple-system, Arial, sans-serif; margin: 0; background: #f4f5f7; color: #1d1d1f; }
+    header { background: #1f3b2c; color: white; padding: 14px 24px; font-size: 18px; font-weight: 600; display: flex; justify-content: space-between; }
+    header a { color: #b9e7c9; font-size: 13px; }
+    .container { max-width: 760px; margin: 24px auto; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 20px 28px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #eee; font-size: 14px; }
+    th { color: #666; font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    a { color: #1f7a4c; text-decoration: none; }
+    .search input { padding: 8px 10px; width: 280px; border: 1px solid #ccc; border-radius: 6px; }
+    .search button { padding: 8px 14px; border: none; background: #1f7a4c; color: white; border-radius: 6px; cursor: pointer; }
+    .back { display: inline-block; margin-bottom: 14px; font-size: 13px; }
+    form.entry label { display: block; font-size: 12px; color: #666; margin-top: 10px; text-transform: uppercase; }
+    form.entry input, form.entry textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; margin-top: 4px; box-sizing: border-box; }
+    form.entry button { margin-top: 16px; padding: 10px 18px; border: none; background: #1f7a4c; color: white; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .flash-success { background: #e6f6ec; color: #1f7a4c; padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
+    .flash-error { background: #fdecea; color: #b3261e; padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
+    .login-box { max-width: 340px; margin: 80px auto; background: white; padding: 28px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .login-box input { width: 100%; padding: 10px; margin-top: 6px; margin-bottom: 14px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+    .login-box button { width: 100%; padding: 10px; border: none; background: #1f7a4c; color: white; border-radius: 6px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <span>🏢 Internal Accounts Payable System</span>
+    {% block nav %}<a href="/logout">log out</a>{% endblock %}
+  </header>
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
